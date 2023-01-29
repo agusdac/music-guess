@@ -1,3 +1,4 @@
 export const ACTION_TYPES = {
-    SET_TOKEN: "set_token"
+    SET_TOKEN: "set_token",
+    LOGOUT: "logout"
 }
