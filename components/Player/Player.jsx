@@ -1,14 +1,15 @@
 import { View, Text, Image, StyleSheet } from 'react-native'
 import React, { useState } from 'react'
-import { NOT_FOUND_URI } from '../../utils/constants'
+import { HIDDEN_ALBUM, NOT_FOUND_URI } from '../../utils/constants'
 import PlayerButtons from './PlayerButtons'
 import { spotifyApi } from '../../services/SpotifyService'
 
-const Player = ({ track }) => {
+const Player = ({ track, hiddenArtist, hiddenAlbum, hiddenTrack }) => {
 
     const [isPlaying, setIsPlaying] = useState(false)
 
     const getAlbumImage = () => {
+        if (hiddenAlbum) return <Image source={HIDDEN_ALBUM} style={styles.albumCover} />
         if (track && track.album.images && track.album.images.length > 0) {
             return <Image source={{ uri: track.album.images[0].url }} style={styles.albumCover} />
         }
@@ -17,10 +18,12 @@ const Player = ({ track }) => {
     }
 
     const getTrackName = () => {
+        if (hiddenTrack) return '---------'
         return track ? track.name : 'Unknown'
     }
 
     const getArtistsNames = () => {
+        if (hiddenArtist) return '---------'
         let names = ''
         if (track && track.artists && track.artists.length > 0) {
             track.artists.forEach((artist, index) => {

@@ -1,13 +1,21 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView } from 'react-native'
 import React, { useContext, useEffect, useState } from 'react'
 import { SpotifyContext } from '../context/SpotifyContext'
 import { ACTION_TYPES } from '../context/SpotifyActions'
-import { getUserPlaylists, spotifyApi } from '../services/SpotifyService'
+import { Ionicons } from '@expo/vector-icons'
+import { spotifyApi } from '../services/SpotifyService'
 import Player from './Player/Player'
 
-const GameScreen = () => {
+const GameScreen = ({ navigation, route }) => {
 
     const [currentTrack, setCurrentTrack] = useState(null)
+    const [tracks, setTracks] = useState(null)
+    const [trackName, setTrackName] = useState('')
+    const [trackArtist, setTrackArtist] = useState('')
+    const [trackAlbum, setTrackAlbum] = useState('')
+    const [hiddenArtist, setHiddenArtist] = useState(true)
+    const [hiddenTrack, setHiddenTrack] = useState(true)
+    const [hiddenAlbum, setHiddenAlbum] = useState(true)
 
     const { state, dispatch } = useContext(SpotifyContext)
 
@@ -16,25 +24,74 @@ const GameScreen = () => {
     }
 
     useEffect(() => {
-        // get this device's id and set it to the playback
-        spotifyApi.getMyDevices().then(res => {
-            console.log(res);
-        })
-        spotifyApi.getTrack('0Zh5U48tZNeAzzLTV1CVBE').then(res => {
-            setCurrentTrack(res)
+        spotifyApi.getPlaylistTracks(route.params.id).then(res => {
+            setTracks(res.items)
+            setCurrentTrack(res.items[0].track)
         })
     }, [])
 
+    const guessName = () => {
+        if (trackName === currentTrack.name) {
+            setHiddenTrack(false)
+        } else {
+            console.log('wrong name');
+        }
+    }
+
+    const guessArtist = () => {
+        if (currentTrack.artists.find(a => a.name === trackArtist)) {
+            setHiddenArtist(false)
+        } else {
+            console.log('wrong name');
+        }
+    }
+
+    const guessAlbum = () => {
+        if (trackAlbum === currentTrack.album.name) {
+            setHiddenAlbum(false)
+        } else {
+            console.log('wrong name');
+        }
+    }
+
     return (
-        <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.container}>
             <View style={styles.playerWrapper}>
-                <Player track={currentTrack} />
+                <Player track={currentTrack} hiddenAlbum={hiddenAlbum}
+                    hiddenArtist={hiddenArtist} hiddenTrack={hiddenTrack} />
+                <View style={styles.inputView}>
+                    <Text>Name: </Text>
+                    <TextInput style={styles.input} value={trackName} onChangeText={text => setTrackName(text)} />
+                    <TouchableOpacity onPress={guessName}>
+                        <Ionicons name="md-send" size={24} color="black" />
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.inputView}>
+                    <Text>Artist: </Text>
+                    <TextInput style={styles.input} value={trackArtist} onChangeText={text => setTrackArtist(text)} />
+                    <TouchableOpacity onPress={guessArtist}>
+                        <Ionicons name="md-send" size={24} color="black" />
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.inputView}>
+                    <Text>Album: </Text>
+                    <TextInput style={styles.input} value={trackAlbum} onChangeText={text => setTrackAlbum(text)} />
+                    <TouchableOpacity onPress={guessAlbum}>
+                        <Ionicons name="md-send" size={24} color="black" />
+                    </TouchableOpacity>
+                </View>
             </View>
-            <TouchableOpacity style={styles.button}
-                onPress={logout}>
-                <Text>Log out</Text>
-            </TouchableOpacity>
-        </View>
+            <View style={styles.bottomButtonsView}>
+                <TouchableOpacity style={{ ...styles.button, marginRight: 40 }}
+                    onPress={() => navigation.goBack()}>
+                    <Text>Back</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.button}
+                    onPress={logout}>
+                    <Text>Log out</Text>
+                </TouchableOpacity>
+            </View>
+        </ScrollView>
     )
 }
 
@@ -57,6 +114,24 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 15,
         borderWidth: 1,
-        borderRadius: 16
+        borderRadius: 16,
     },
+    bottomButtonsView: {
+        flexDirection: 'row',
+        justifyContent: 'center'
+    },
+    inputView: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexDirection: 'row',
+        marginTop: 20
+    },
+    input: {
+        minWidth: 200,
+        minHeight: 40,
+        borderWidth: 1,
+        borderColor: 'black',
+        marginRight: 10,
+        borderRadius: 16
+    }
 });

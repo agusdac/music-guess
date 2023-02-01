@@ -4,13 +4,17 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import GameScreen from '../components/GameScreen';
 import SpotifyLogin from '../components/SpotifyLogin';
 import { SpotifyContext } from '../context/SpotifyContext';
+import PlaylistsScreen from '../components/PlaylistsScreen';
 
 const Stack = createNativeStackNavigator();
 
 const LoggedInNavigator = () => {
     return (
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Game" component={GameScreen} />
+        <Stack.Navigator>
+            <Stack.Screen name="Playlists" component={PlaylistsScreen} options={{
+                title: "Your playlists"
+            }} />
+            <Stack.Screen name="Game" component={GameScreen} options={{ headerShown: false }} />
         </Stack.Navigator>
     )
 }
